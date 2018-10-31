@@ -24,28 +24,61 @@ app.set('view engine', 'ejs');
 var sess;
 
 
-var conn = mysql.createClient({
+/*var conn = mysql.createConnection({
 	    host     : 'us-cdbr-iron-east-01.cleardb.net',
       user     : 'b76ef6a5058cf7',
       password : '3189e5ce',
       database : 'heroku_4d402e4dd2b263c'
 });
 
-/*conn.connect(function(err) {
+conn.connect(function(err) {
       if (err) throw err;
       console.log("Connected to MySQL!");
 });*/
 
+var conn;
+
+function connectWithHandlers() {
+  connection = mysql.createConnection({
+    host     : 'us-cdbr-iron-east-01.cleardb.net',
+    user     : 'b76ef6a5058cf7',
+    password : '3189e5ce',
+    database : 'heroku_4d402e4dd2b263c'
+  });                                  // Recreate the connection, since
+                                                  // the old one cannot be reused.
+
+  connection.connect(function(err) {              // The server is either down
+    if(err) {                                     // or restarting (takes a while sometimes).
+      console.log('error when connecting to db:', err);
+      setTimeout(handleDisconnect, 2000); // We introduce a delay before attempting to reconnect,
+    }else{
+      console.log('Connected to MySQL!!')
+    }                                     // to avoid a hot loop, and to allow our node script to
+  });                                     // process asynchronous requests in the meantime.
+                                          // If you're also serving http, display a 503 error.
+  connection.on('error', function(err) {
+    console.log('db error', err);
+    if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+      conn = connectWithHandlers();                         // lost due to either server restart, or a
+    } else {                                      // connnection idle timeout (the wait_timeout
+      throw err;                                  // server variable configures this)
+    }
+  });
+
+  return connection;
+}
+
+conn = connectWithHandlers();
+
 app.get('/login', function (req, res) {
-  dbQueries.getQuestions(conn, 2);
   res.render('login');
 });
 
 app.post('/login', function (req, res) {
   var email = req.body.email;
   var password = req.body.password;
-  console.log(email);
-  console.log(password);
+  //console.log(email);
+  //console.log(password);
   if(email === "kharekartik@gmail.com" && password === "kaykay21") {
     req.session.email = email;
     res.redirect('/');
@@ -96,7 +129,7 @@ app.post('/quiz', function(req, res){
 });
 
 app.get('/quiz/:id', function (req, res) {
-  var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
+  /*var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
   var jsonContent = JSON.parse(readQuiz);
   var targetQuiz;;
   for (var i = 0; i < jsonContent.length; i++) {
@@ -105,7 +138,10 @@ app.get('/quiz/:id', function (req, res) {
       break;
     }
   }
-  res.send(targetQuiz);
+  res.send(targetQuiz);*/
+  dbQueries.getQuestions(conn, 3, function(questions){
+    res.send(questions);
+  });
 });
 
 app.put('/quiz/:id', function (req, res) {
@@ -193,5 +229,5 @@ app.get('/titlesandids', function (req, res) {
 var server = app.listen(process.env.PORT || 4000, function() {
   var host = server.address().address;
   var port = server.address().port;
-  console.log('Example app listening at http://%s:%s', host, port);
+  console.log('Shardas Quiz App listening at http://%s:%s', host, port);
 });

@@ -367,7 +367,7 @@ function nameForm(){
     $('#welcome').text("Welcome " + name + "!");
     $('#welcome').prepend('<a href="/"><img src="static/HomeIcon.png" width="38" height="38" id="homeImg" alt=""></a>');
     selectedQuiz = ids[titles.indexOf($('#titlesDropdown option:selected').text())];
-    var selectedTitle = $('#titlesDropdown option:selected').text();
+    var selectedTitle = 'Computer Science Quiz';
     $('#title').text(selectedTitle);
     document.title = selectedTitle;
     loadQuiz(selectedQuiz);
@@ -461,18 +461,24 @@ function loadQuiz(target){
     $('#backHome').hide();
     $('#reload').hide();
     quiz = data;
-    if (quiz["questions"] === undefined) {
+    if (quiz === undefined) {
       $('#ajaxloading').text("Sorry, we cannot load the quiz. Please reload the page to try again.");
       $('#ajaxloading').show();
       $('#reload').show();
       $('#backHome').show();
     }
     else {
-      quizLength = quiz["questions"].length;
+      /*quizLength = quiz["questions"].length;
       $('#nextQuestion').show();
       $('#answerChoices').show();
       $('#description').text(quiz["description"]);
       $('#description').show();
+      nextQuestion();*/
+      quizLength = quiz.length;
+      $('#nextQuestion').show();
+      $('#answerChoices').show();
+      //$('#description').text(quiz["description"]);
+      //$('#description').show();
       nextQuestion();
     }
   })
@@ -1089,8 +1095,13 @@ function submitEditedQuiz(){
 // Show questions and answers
 function generateQA (){
   $('#questionNumber').text("Question " + (currentQuestion+1)).hide().fadeIn();
-  $('#question').text(quiz["questions"][currentQuestion]["text"]).hide().fadeIn();
-  numAns = quiz["questions"][currentQuestion]["answers"].length;
+  
+  //Commented by ME
+  //$('#question').text(quiz["questions"][currentQuestion]["text"]).hide().fadeIn();
+  //numAns = quiz["questions"][currentQuestion]["answers"].length;
+  $('#question').text(quiz[currentQuestion]["question_text"]).hide().fadeIn();
+  numAns = 4;
+
   // if answered already
   if (currentQuestion < userAnswers.length) {
     $('input[name="answers"][id="' + userAnswers[currentQuestion][2] + '"]').prop('checked',true);
@@ -1100,7 +1111,7 @@ function generateQA (){
       // answer choices radio button labels
       var aID = "label[for=" + i + "]";
       $(aID).fadeIn();
-      $(aID).html(quiz["questions"][currentQuestion]["answers"][i]).hide().fadeIn();
+      $(aID).html(quiz[currentQuestion]["option" + (i+1)]).hide().fadeIn();
     }
     // hide excess answer choices
     for (var a = numAns; a<7; a++) {
@@ -1120,7 +1131,7 @@ function generateQA (){
       // answer choices radio button labels
       var aID = "label[for=" + i + "]";
       $(aID).fadeIn();
-      $(aID).html(quiz["questions"][currentQuestion]["answers"][i]).hide().fadeIn();
+      $(aID).html(quiz[currentQuestion]["option"+(i+1)]).hide().fadeIn();
     }
     // hide excess answer choices
     for (var a = numAns; a<7; a++) {
@@ -1131,7 +1142,7 @@ function generateQA (){
     }
 
   }
-  var tempTags = "";
+  /*var tempTags = "";
   for (var z = 0; z < quiz["questions"][currentQuestion]["meta_tags"].length; z++) {
     tempTags+=quiz["questions"][currentQuestion]["meta_tags"][z] + ", ";
   }
@@ -1148,7 +1159,7 @@ function generateQA (){
       $( "#images" ).hide().fadeIn("slow");
       if ( i == 0 ) return false;
     });
-  });
+  });*/
   if (currentQuestion === 0) {
     $('#previousQuestion').hide();
   }
@@ -1178,21 +1189,21 @@ function whichChecked() {
     if ($("input[name='answers'][id='" + i + "']").is(':checked')) {
       // if already added to userAnswers
       if (currentQuestion < userAnswers.length) {
-        if (i === quiz["questions"][currentQuestion]["correct_answer"]) {
+        if (i+1 === quiz[currentQuestion]["correct_option"]) {
           userAnswers[currentQuestion][1] = true;
-          userAnswers[currentQuestion][2] = i;
+          userAnswers[currentQuestion][2] = i+1;
         }
         else {
           userAnswers[currentQuestion][1] = false;
-          userAnswers[currentQuestion][2] = i;
+          userAnswers[currentQuestion][2] = i+1;
         }
       }
       // if new answer
       else {
-        if (i === quiz["questions"][currentQuestion]["correct_answer"])
-          userAnswers.push([currentQuestion, true, i]);
+        if (i+1 === quiz[currentQuestion]["correct_option"])
+          userAnswers.push([currentQuestion, true, i+1]);
         else
-          userAnswers.push([currentQuestion, false, i]);
+          userAnswers.push([currentQuestion, false, i+1]);
       }
     }
   }
@@ -1284,31 +1295,36 @@ function userScore() {
 function calculateScore() {
   for (var i = 0; i < quizLength; i++){
     if (userAnswers[i][1]) {
-      quiz["questions"][i]["global_correct"]+=1;
+      //quiz[i]["global_correct"]+=1;
       score++;
     }
-    quiz["questions"][i]["global_total"]+=1;
+    //quiz["questions"][i]["global_total"]+=1;
   }
 }
 
 // Display score table
 function scorePerQuestionTable() {
+  var correctAnsQuiz = 0;
   for (var r = 0; r < quizLength; r++) {
     $('#scoreTable').fadeIn("slow");
-    var scorePercent = Math.round(100*quiz["questions"][r]["global_correct"]/quiz["questions"][r]["global_total"]);
-    if (userAnswers[r][1])
-      $('#scoreTable > tbody:last-child').append('<tr class="success"><td class="questionNum">' + (r + 1) + '. ' + quiz["questions"][r]["text"] +
-        '</td><td>' + quiz["questions"][r]["answers"][userAnswers[r][2]] +
-        '<td>' + quiz["questions"][r]["answers"][quiz["questions"][r]["correct_answer"]] +
-        '</td><td>' + scorePercent + "%" +
+    //var scorePercent = Math.round(100*quiz["questions"][r]["global_correct"]/quiz["questions"][r]["global_total"]);
+    
+    if (userAnswers[r][1]){
+      $('#scoreTable > tbody:last-child').append('<tr class="success"><td class="questionNum">' + (r + 1) + '. ' + quiz[r]["question_text"] +
+        '</td><td>' + quiz[r]["option" + userAnswers[r][2]] +
+        '<td>' + quiz[r]["option" + quiz[r]["correct_option"]] +
+        '</td><td>' + quiz[r]["explaination"] +
         '</td></tr>');
-    else
-      $('#scoreTable > tbody:last-child').append('<tr class="danger"><td class="questionNum">' + (r + 1) + '. ' + quiz["questions"][r]["text"] +
-        '</td><td>' + quiz["questions"][r]["answers"][userAnswers[r][2]] +
-        '<td>' + quiz["questions"][r]["answers"][quiz["questions"][r]["correct_answer"]] +
-        '</td><td>' + scorePercent + "%" +
+        correctAnsQuiz++;
+    }else {
+      $('#scoreTable > tbody:last-child').append('<tr class="danger"><td class="questionNum">' + (r + 1) + '. ' + quiz[r]["question_text"] +
+        '</td><td>' + quiz[r]["option" + userAnswers[r][2]] +
+        '<td>' +  quiz[r]["option" + quiz[r]["correct_option"]] +
+        '</td><td>' + quiz[r]["explaination"]  +
         '</td></tr>');
+    }
   }
+  var scorePercent = Math.round(100*correctAnsQuiz/quizLength);
 }
 
 // Create pie chart for score
@@ -1424,7 +1440,7 @@ function nextQuestion() {
       scorePerQuestionTable();
 
       // Global Scores
-      $.ajax({
+      /*$.ajax({
         type:"PUT",
         url: "quiz/" + quiz["id"],
         data: JSON.stringify(quiz),
@@ -1442,8 +1458,12 @@ function nextQuestion() {
         fail: function(){
           // console.log("FAILED");
         }
-      });
-      userScore();
+      });*/
+
+      //SHOULD BE UNCOMMENTED TO STORE user scores
+      //userScore();
+      createPieChart(quizLength-score, score, ((quizLength-score)*100)/quizLength, 100*score/quizLength);
+
     }
   }
 
