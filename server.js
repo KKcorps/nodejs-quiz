@@ -5,6 +5,8 @@ use templating for dropdown quiz selection?
 var express = require('express');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var mysql = require('mysql');
+var dbQueries = require('./db_queries.js');
 
 var fs = require('fs');
 var path = require('path');
@@ -21,7 +23,21 @@ app.set('view engine', 'ejs');
 
 var sess;
 
+
+var conn = mysql.createClient({
+	    host     : 'us-cdbr-iron-east-01.cleardb.net',
+      user     : 'b76ef6a5058cf7',
+      password : '3189e5ce',
+      database : 'heroku_4d402e4dd2b263c'
+});
+
+/*conn.connect(function(err) {
+      if (err) throw err;
+      console.log("Connected to MySQL!");
+});*/
+
 app.get('/login', function (req, res) {
+  dbQueries.getQuestions(conn, 2);
   res.render('login');
 });
 
