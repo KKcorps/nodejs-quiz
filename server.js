@@ -74,6 +74,8 @@ app.get('/login', function (req, res) {
   res.render('login');
 });
 
+var incorrectLogin = false
+
 app.post('/login', function (req, res) {
   var email = req.body.email;
   var password = req.body.password;
@@ -83,8 +85,8 @@ app.post('/login', function (req, res) {
     req.session.email = email;
     res.redirect('/');
   }else{
-    res.write('<h1>Please try logging in again.</h1>');
-    res.end(403);
+    res.write('<h1>Please try logging in again.</h1> <a href="/login" class="btn btn-default">Try Again!</a>');
+    res.status(403).end();
   } 
 });
 
