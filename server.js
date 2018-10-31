@@ -31,7 +31,7 @@ app.post('/login', function (req, res) {
   console.log(email);
   console.log(password);
   if(email === "kharekartik@gmail.com" && password === "kaykay21") {
-    sess.email = email;
+    req.session.email = email;
     res.redirect('/');
   }else{
     res.write('<h1>Please try logging in again.</h1>');
