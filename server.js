@@ -79,7 +79,7 @@ app.post('/login', function (req, res) {
   var password = req.body.password;
   //console.log(email);
   //console.log(password);
-  if(email === "kharekartik@gmail.com" && password === "kaykay21") {
+  if(email === "kkdfuturestar@gmail.com" && password === "kaykay21") {
     req.session.email = email;
     res.redirect('/');
   }else{
