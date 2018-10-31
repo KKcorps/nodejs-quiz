@@ -8,7 +8,8 @@
     "ejs": "^2.3.4",
     "express": "^4.13.3",
     "fs": "0.0.2",
-    "mysql": "0.9"
+    "mysql": "0.9",
+    "express-session" : "^1.14"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
