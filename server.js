@@ -40,6 +40,7 @@ app.post('/login', function (req, res) {
 });
 
 app.get('/', function (req, res) {
+  sess = req.session;
   if(sess.email){
     var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
     var jsonContent = JSON.parse(readQuiz);
