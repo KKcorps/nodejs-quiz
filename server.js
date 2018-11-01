@@ -116,19 +116,27 @@ app.get('/,/quiz', function (req, res) {
 });
 
 app.post('/quiz', function(req, res){
-  var sentQuiz = req.body;
-  var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
-  var jsonContent = JSON.parse(readQuiz);
-  if (jsonContent.length > 0) {
-    sentQuiz["id"] = jsonContent[jsonContent.length-1]["id"] + 1;
-  }
-  jsonContent.push(sentQuiz);
 
-  var jsonString = JSON.stringify(jsonContent);
-  fs.writeFile("data/allQuizzes.json", jsonString);
+  var questions = req.body.questions;
+  var numInserted = 0;
+  addQuestionToDB(questions, 0);
+  res.send("Added all the questions");
 
-  res.send("updated");
 });
+
+var addQuestionToDB = function(questions, idx){
+    if(idx==questions.length) return "SUCCESS";
+
+    var currentQuestion = questions[idx];
+    var qText = currentQuestion["question_text"];
+    var qOptions = currentQuestion["options"];
+    var qCorrectOption = currentQuestion["correct_option"];
+    var qExplanation = currentQuestion["explanation"][0];
+    dbQueries.addQuestion(conn, qText, qOptions, qCorrectOption, qExplanation, function(dbResult){
+      addQuestionToDB(questions, idx+1);
+    })
+    return "SUCCESS";
+}
 
 app.get('/quiz/:id', function (req, res) {
   /*var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
