@@ -81,13 +81,28 @@ app.post('/login', function (req, res) {
   var password = req.body.password;
   //console.log(email);
   //console.log(password);
-  if(email === "kkdfuturestar@gmail.com" && password === "kaykay21") {
-    req.session.email = email;
-    res.redirect('/');
-  }else{
-    res.write('<h1>Please try logging in again.</h1> <a href="/login" class="btn btn-default">Try Again!</a>');
-    res.status(403).end();
-  } 
+  dbQueries.validateLogin(conn, email, password, function(err, result){
+    if(err){
+      res.write('<h1>Some error encountered. Please try logging in again.</h1> <a href="/login" class="btn btn-default">Try Again!</a>');
+      res.status(500).end();
+    }else{
+      if(result.length > 0){
+        req.session.email = email;
+        req.session.account_type = result[0]['account_type'];
+        res.redirect('/');
+      }else{
+        res.write('<h1>Invalid email or password. Please try logging in again.</h1> <a href="/login" class="btn btn-default">Try Again!</a>');
+        res.status(403).end();
+      }
+    }
+  })
+});
+
+app.get('/logout', function (req, res) {
+  req.session.destroy;
+
+  res.redirect('/login');
+
 });
 
 app.get('/', function (req, res) {
@@ -99,7 +114,7 @@ app.get('/', function (req, res) {
     for (var i = 0; i<jsonContent.length; i++) {
       titles[i] = jsonContent[i]["title"];
     }
-    res.render('index',{titles: titles});
+    res.render('index',{titles: titles, account_type : sess.account_type});
   }else{
     res.redirect('/login')
   }
@@ -185,6 +200,7 @@ app.delete('/quiz/:id', function (req, res) {
   res.send("deleted");
 });
 
+
 app.get('/reset', function (req, res) {
   var readIn = fs.readFileSync("data/defaultallquizzes.json", 'utf8');
   // var readInAdded = fs.readFileSync("data/allQuizzes.json", 'utf8');
@@ -200,8 +216,9 @@ app.get('/revert', function (req, res) {
 });
 
 app.get('/users', function (req, res) {
-  var readUsers = fs.readFileSync("data/users.json", 'utf8');
-  res.send(readUsers);
+   dbQueries.getAllScores(conn, function(err, result){
+       res.send(result); 
+    });
 });
 
 app.post('/users', function(req, res){
@@ -218,7 +235,7 @@ app.get('/titles', function (req, res) {
     if (i < jsonContent.length -1)
       titles += "\"" + jsonContent[i]["title"] + "\"" + ", ";
     else
-      titles += "\"" + jsonContent[i]["title"] + "\"";
+      titles += "\"" + jsonContent[i]["title"] + "\"";      
   }
   titles += "]";
   res.send(titles);

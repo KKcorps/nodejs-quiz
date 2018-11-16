@@ -15,6 +15,27 @@ module.exports = {
                   //console.log(result);
                   return callback(result);
             });     
+      },
+      validateLogin : function(conn, email, password, callback){
+            var sqlQuery = "SELECT * FROM Users where email='"+email+"' AND password='"+password+"'";
+            conn.query(sqlQuery, function(err, result){
+                  //if(err) throw err;
+                  return callback(err, result);
+            });
+      },
+      addScore : function(conn, name, correct, total){
+            var sqlQuery = "INSERT INTO Scores(student_name, user_correct, user_total) VALUES('" + name + "', '" + correct + "', '" + total + "' )";
+            conn.query(sqlQuery, function(err, result){
+                  //if(err) throw err;
+                  return callback(err, result);
+            })
+      },
+      getAllScores : function(conn, callback){
+            var sqlQuery = "SELECT * FROM Scores";
+            conn.query(sqlQuery, function(err, result){
+                  //if(err) throw err;
+                  return callback(err, result);
+            });
       }
 };
 
