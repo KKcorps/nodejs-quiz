@@ -26,8 +26,8 @@ module.exports = {
       addScore : function(conn, name, correct, total){
             var sqlQuery = "INSERT INTO Scores(student_name, user_correct, user_total) VALUES('" + name + "', '" + correct + "', '" + total + "' )";
             conn.query(sqlQuery, function(err, result){
-                  //if(err) throw err;
-                  return callback(err, result);
+                  if(err) throw err;
+                  //return callback(err, result);
             })
       },
       getAllScores : function(conn, callback){

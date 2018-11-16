@@ -222,9 +222,14 @@ app.get('/users', function (req, res) {
 });
 
 app.post('/users', function(req, res){
-  var jsonString = JSON.stringify(req.body);
+  /*var jsonString = JSON.stringify(req.body);
   fs.writeFile("data/users.json", jsonString);
-  res.send(req.body);
+  res.send(req.body);*/
+  var name = req.body.name;
+  var score = req.body.correct;
+  var total = req.body.total;
+
+  dbQueries.addScore(conn, name, score, total);
 });
 
 app.get('/titles', function (req, res) {

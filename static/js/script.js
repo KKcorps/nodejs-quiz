@@ -1508,25 +1508,25 @@ function nextQuestion() {
       scorePerQuestionTable();
 
       // Global Scores
-      /*$.ajax({
-        type:"PUT",
-        url: "quiz/" + quiz["id"],
-        data: JSON.stringify(quiz),
+      $.ajax({
+        type:"POST",
+        url: "users",
+        data: JSON.stringify({'name' : name, 'correct' : score, 'total': quizLength}),
         timeout: 2000,
         contentType: "application/json; charset=utf-8",
         beforeSend: function(){
-          // console.log ("BEFORE SEND");
+          console.log ("BEFORE SEND");
         },
         complete: function() {
-          // console.log ("COMPLETE LOADING");
+          console.log ("COMPLETE SENDING SCORE");
         },
         success: function(data){
-          // console.log("quiz sent");
+          console.log("Added user score to DB!!");
         },
         fail: function(){
-          // console.log("FAILED");
+          console.log("FAILED while adding user score to DB!!");
         }
-      });*/
+      });
 
       //SHOULD BE UNCOMMENTED TO STORE user scores
       //userScore();
