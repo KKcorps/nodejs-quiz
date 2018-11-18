@@ -19,7 +19,7 @@ var titles;
 var selectedQuiz = 0;
 var ids;
 var notificationFadeTime = 3000;
-var min = 1;
+var min = 5;
 var sec = 0;
 var tim;
 var isTimerRunning = false;
