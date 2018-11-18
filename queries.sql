@@ -5,6 +5,7 @@ CREATE TABLE Scores(student_name varchar(200), user_correct int, user_total int)
 INSERT INTO Users(email, password, account_type) VALUES('kkdfuturestar@gmail.com', 'kaykay21', 'student');
 INSERT INTO Users(email, password, account_type) VALUES('some_professor@gmail.com', 'abc123', 'professor');
 
+INSERT INTO Scores(student_name, user_correct, user_total) VALUES('KAJOL', 8, 10)
 INSERT INTO Questions(question_text, option1, option2, option3, option4, correct_option, explaination) VALUES ('An index is clustered, if', 'it is on a set of fields that form a candidate key', 'it is on a set of fields that include the primary key', 'the data records of the file are organized in the same order as the data entries of the index', 'the data records of the file are organized not in the same order as the data entries of the index', 3, 'A database index is clustered if physical records on disk follow the index order');
 
 

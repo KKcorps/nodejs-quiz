@@ -1,12 +1,12 @@
-/*//update title of tab
-Take Quiz, modify quiz, edit quiz, delete quiz
-use templating for dropdown quiz selection?
+/*
+Contains API calls used by web page to get or store data or load appropriate web page
 */
-var express = require('express');
-var bodyParser = require('body-parser');
-var session = require('express-session');
-var mysql = require('mysql');
-var dbQueries = require('./db_queries.js');
+
+var express = require('express'); //Framework of Nodejs to make things simpler such as API calls
+var bodyParser = require('body-parser'); //Required to parse JSON body of POST request 
+var session = require('express-session'); //Required to store current User to check if he's logged in or not
+var mysql = require('mysql'); //To make mysql queries
+var dbQueries = require('./db_queries.js'); //Mysql queries helper function
 
 var fs = require('fs');
 var path = require('path');
@@ -19,24 +19,15 @@ app.use(session({secret: 'kajolkhare'}));
 
 var content = fs.readFileSync("static/index.html", 'utf8');
 app.use("/static", express.static('static'));
-app.set('view engine', 'ejs');
+app.set('view engine', 'ejs'); //To use .ejs files as HTML files 
+//EJS helps in directly accessing nodejs variables in HTML page
+//E.g. to decid what buttons to show based on logged in user type
 
 var sess;
 
-
-/*var conn = mysql.createConnection({
-	    host     : 'us-cdbr-iron-east-01.cleardb.net',
-      user     : 'b76ef6a5058cf7',
-      password : '3189e5ce',
-      database : 'heroku_4d402e4dd2b263c'
-});
-
-conn.connect(function(err) {
-      if (err) throw err;
-      console.log("Connected to MySQL!");
-});*/
-
 var conn;
+
+var numberOfQuestionsInQuiz = 6;
 
 function connectWithHandlers() {
   connection = mysql.createConnection({
@@ -70,17 +61,18 @@ function connectWithHandlers() {
 
 conn = connectWithHandlers();
 
+
+//Load Login Page
 app.get('/login', function (req, res) {
   res.render('login');
 });
 
-var incorrectLogin = false
 
+//Check if login credential are correct
 app.post('/login', function (req, res) {
   var email = req.body.email;
   var password = req.body.password;
-  //console.log(email);
-  //console.log(password);
+
   dbQueries.validateLogin(conn, email, password, function(err, result){
     if(err){
       res.write('<h1>Some error encountered. Please try logging in again.</h1> <a href="/login" class="btn btn-default">Try Again!</a>');
@@ -98,6 +90,8 @@ app.post('/login', function (req, res) {
   })
 });
 
+
+//Logout current User
 app.get('/logout', function (req, res) {
   req.session.destroy;
 
@@ -105,17 +99,15 @@ app.get('/logout', function (req, res) {
 
 });
 
+
+//Load main page
+//Account type can be student or professor
+//Contents on the main page are decided on the basis of account type
 app.get('/', function (req, res) {
   sess = req.session;
   if(sess.email){
-    var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
-    var jsonContent = JSON.parse(readQuiz);
-    var titles = [];
-    for (var i = 0; i<jsonContent.length; i++) {
-      titles[i] = jsonContent[i]["title"];
-    }
     dbQueries.getAllQuestions(conn, function(result){
-      res.render('index',{titles: titles, account_type : sess.account_type, questions : result});
+      res.render('index',{titles: result, account_type : sess.account_type, questions : result});
     });
     
   }else{
@@ -123,16 +115,8 @@ app.get('/', function (req, res) {
   }
 });
 
-app.get('/,/quiz', function (req, res) {
-  var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
-  var jsonContent = JSON.parse(readQuiz);
-  var titles = [];
-  for (var i = 0; i<jsonContent.length; i++) {
-    titles[i] = jsonContent[i]["title"];
-  }
-  res.send(JSON.stringify(titles));
-});
 
+//Add new questions to Database
 app.post('/quiz', function(req, res){
 
   var questions = req.body.questions;
@@ -142,6 +126,7 @@ app.post('/quiz', function(req, res){
 
 });
 
+//Helper function for above API call
 var addQuestionToDB = function(questions, idx){
     if(idx==questions.length) return "SUCCESS";
 
@@ -156,81 +141,33 @@ var addQuestionToDB = function(questions, idx){
     return "SUCCESS";
 }
 
+//Load  the questions of quiz
+//Only numberOfQuestionsInQuiz questions are sent to HTML page
 app.get('/quiz/:id', function (req, res) {
-  /*var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
-  var jsonContent = JSON.parse(readQuiz);
-  var targetQuiz;;
-  for (var i = 0; i < jsonContent.length; i++) {
-    if (jsonContent[i]["id"] === parseInt(req.params.id)) {
-      targetQuiz = jsonContent[i];
-      break;
-    }
-  }
-  res.send(targetQuiz);*/
-  dbQueries.getQuestions(conn, 6, function(questions){
+  dbQueries.getQuestions(conn, numberOfQuestionsInQuiz, function(questions){
     res.send(questions);
   });
 });
 
-app.put('/quiz/:id', function (req, res) {
-  var sentQuiz = req.body;
-  var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
-  var jsonContent = JSON.parse(readQuiz);
-  for (var i = 0; i < jsonContent.length; i++) {
-    if (jsonContent[i]["id"] === parseInt(req.params.id)) {
-      jsonContent[i] = sentQuiz;
-      break;
-    }
-  }
 
-  var jsonString = JSON.stringify(jsonContent);
-  fs.writeFile("data/allQuizzes.json", jsonString);
-
-  res.send("updated");
-});
-
+//Delete a question from quiz
 app.delete('/quiz/:id', function (req, res) {
- /* var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
-  var jsonContent = JSON.parse(readQuiz);
-  for (var i = 0; i < jsonContent.length; i++) {
-    if (jsonContent[i]["id"] === parseInt(req.params.id)) {
-      jsonContent.splice(i, 1);
-      break;
-    }
-  }
-  var jsonString = JSON.stringify(jsonContent);
-  fs.writeFile("data/allQuizzes.json", jsonString);*/
   dbQueries.deleteQuestion(conn, req.params.id, function(result){
     res.send("deleted");
   });
   
 });
 
-
-app.get('/reset', function (req, res) {
-  var readIn = fs.readFileSync("data/defaultallquizzes.json", 'utf8');
-  // var readInAdded = fs.readFileSync("data/allQuizzes.json", 'utf8');
-  // fs.writeFile("data/allQuizzesRevert.json", readInAdded);
-  fs.writeFile("data/allQuizzes.json", readIn);
-  res.send("default quizzes restored");
-});
-
-app.get('/revert', function (req, res) {
-  var readIn = fs.readFileSync("data/allQuizzesRevert.json", 'utf8');
-  fs.writeFile("data/allQuizzes.json", readIn);
-  res.send("reverted");
-});
-
+//Get All the user scores
 app.get('/users', function (req, res) {
    dbQueries.getAllScores(conn, function(err, result){
        res.send(result); 
     });
 });
 
+//Add user score to DB when quiz is completed
 app.post('/users', function(req, res){
-  /*var jsonString = JSON.stringify(req.body);
-  fs.writeFile("data/users.json", jsonString);
-  res.send(req.body);*/
+
   var name = req.body.name;
   var score = req.body.correct;
   var total = req.body.total;
@@ -238,29 +175,8 @@ app.post('/users', function(req, res){
   dbQueries.addScore(conn, name, score, total);
 });
 
-app.get('/titles', function (req, res) {
-  var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
-  var jsonContent = JSON.parse(readQuiz);
-  var titles = "[";
-  for (var i = 0; i<jsonContent.length; i++) {
-    if (i < jsonContent.length -1)
-      titles += "\"" + jsonContent[i]["title"] + "\"" + ", ";
-    else
-      titles += "\"" + jsonContent[i]["title"] + "\"";      
-  }
-  titles += "]";
-  res.send(titles);
-});
-
+//Get all the questions in db for delete questions select box
 app.get('/titlesandids', function (req, res) {
-  /*var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
-  var jsonContent = JSON.parse(readQuiz);
-  var titles = [];
-  for (var i = 0; i<jsonContent.length; i++) {
-    titles[i] = jsonContent[i]["title"];
-    titles[jsonContent.length + i] = jsonContent[i]["id"];
-  }
-  res.send(JSON.stringify(titles));*/
 
   dbQueries.getAllQuestions(conn, function(result){
     res.send(JSON.stringify(result));
@@ -268,7 +184,7 @@ app.get('/titlesandids', function (req, res) {
 
 });
 
-
+//RUN the server on port set by enivronment variable PORT or default port 400
 var server = app.listen(process.env.PORT || 4000, function() {
   var host = server.address().address;
   var port = server.address().port;

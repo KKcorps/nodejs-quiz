@@ -206,12 +206,6 @@ $(document).ready(function() {
       });
   }
 
-  
-  /*document.getElementById("reset_quiz").addEventListener("click", function(e) {
-    resetQuizzes();
-    e.preventDefault();
-  });*/
-
 
   document.getElementById("previousQuestion").addEventListener("click", back);
   document.getElementById("nextQuestion").addEventListener("click", nextQuestion);
@@ -390,7 +384,8 @@ $(document).ready(function() {
     }
   });
 });
-// After name is submitted on initial screen
+
+// Load quiz after name is submitted on initial screen or display error message if name is empty
 function nameForm(){
   name = $('#nameForm').serializeArray()[0]["value"];
   if (name.length === 0) {
@@ -416,6 +411,9 @@ function nameForm(){
   }
 }
 
+//Start Exam timer
+//Every second call the function again to decrease sec by 1 second i.e. sec = sec - 1;
+
 function examTimer() {
   if (parseInt(sec) > 0) {
     $("#showtime").text("Time Remaining :"+min+" Minutes ," + sec+" Seconds");
@@ -429,11 +427,6 @@ function examTimer() {
         alert("Time Up!! Try Completing the quiz next time! You'll be redirected to home page now. ");
         window.location = "/"
       }
-      //document.questionForm.minute.value=0;
-      //document.questionForm.second.value=0;
-
-      //TODO: Change it to real submit
-      //document.questionForm.submit();
 
     }
 
@@ -447,7 +440,7 @@ function examTimer() {
   }
 }
 
-// load titles in allQuizzes
+// load all questions for the delete button select box
 function loadTitles(){
   $.getJSON('titlesandids')
   .done(function (data) {
@@ -485,48 +478,7 @@ function loadTitles(){
   });
 }
 
-function resetQuizzes() {
-  $.ajax({
-  type:"GET",
-  url: "reset",
-  timeout: 2000,
-  beforeSend: function(){
-    $("#reset_quiz").attr("disabled", true);
-      // console.log ("BEFORE RESET SEND");
-    },
-    complete: function() {
-      // console.log ("COMPLETE RESET LOADING");
-      $('#ajaxloading').hide();
-      $('#backHome').hide();
-      $('#reload').hide();
-      $('#placeholderSuccess > p > span').text("Quizzes have been reset!");
-      $('#placeholderSuccess > p > span').append('&nbsp;');
-      $('#placeholderSuccess').show();
-      $("#placeholderSuccess").fadeTo(notificationFadeTime, 500).slideUp(500, function(){
-        $("#placeholderSuccess").hide();
-      });
-      $("#reset_quiz").attr("disabled", false);
-      loadTitles();
-    },
-    success: function(data){
-      // console.log("RESET sent");
-    },
-    fail: function(){
-      // console.log ('RESET FAIL');
-      $('#ajaxloading').text("Sorry, we cannot reset the quizzes. Please reload the page to try again.");
-      $('#ajaxloading').show();
-      $('#reload').show();
-    },
-    always: function() {
-      $('#reload').on('click', function(e){
-        e.preventDefault();
-        resetQuizzes();
-      });
-    }
-  });
-}
-
-// load target quiz json
+// load The quiz
 function loadQuiz(target){
   $.getJSON('quiz/' + target)
   .done(function (data) {
@@ -541,17 +493,9 @@ function loadQuiz(target){
       $('#backHome').show();
     }
     else {
-      /*quizLength = quiz["questions"].length;
-      $('#nextQuestion').show();
-      $('#answerChoices').show();
-      $('#description').text(quiz["description"]);
-      $('#description').show();
-      nextQuestion();*/
       quizLength = quiz.length;
       $('#nextQuestion').show();
       $('#answerChoices').show();
-      //$('#description').text(quiz["description"]);
-      //$('#description').show();
       nextQuestion();
     }
   })
@@ -569,68 +513,11 @@ function loadQuiz(target){
   });
 }
 
+// To show Add questions form
 function loadQuizToCreate() {
   $('#editQuiz').empty();
-  /*$('<label>').attr({
-    for: 'titleLabel',
-      id: 'titleLabel'
-  }).appendTo('#editQuiz');
-  $("#titleLabel").text("Quiz Title:");
-  $('<br>').appendTo('#editQuiz');
-  $('<input>').attr({
-    type: 'text',
-    id: 'titleInput',
-    name: 'title',
-    class: 'form-control',
-    placeholder: "Quiz Title"
-  }).appendTo('#editQuiz');
-  $('<br>').appendTo('#editQuiz');
-
-  $('<label>').attr({
-    for: 'descriptionLabel',
-      id: 'descriptionLabel'
-  }).appendTo('#editQuiz');
-  $("#descriptionLabel").text("Quiz Description:");
-  $('<br>').appendTo('#editQuiz');
-  $('<input>').attr({
-    type: 'text',
-    id: 'descriptionInput',
-    name: 'metaTags',
-    class: 'form-control',
-    placeholder: "Quiz Description"
-  }).appendTo('#editQuiz');
-  $('<br>').appendTo('#editQuiz');
-
-  $('<label>').attr({
-    for: 'quizMetaTagsLabel',
-      id: 'quizMetaTagsLabel'
-  }).appendTo('#editQuiz');
-  $("#quizMetaTagsLabel").text("Quiz Meta Tags:");
-  $('<br>').appendTo('#editQuiz');
-  $('<input>').attr({
-    type: 'text',
-    id: 'quizMetaTagsInput',
-    name: 'metaTags',
-    class: 'form-control',
-    placeholder: 'Quiz Meta Tags (ex: tag, tag, tag)'
-  }).appendTo('#editQuiz');
-  $('<br>').appendTo('#editQuiz');
-
-  $('<label>').attr({
-    for: 'difficultyLabel',
-      id: 'difficultyLabel'
-  }).appendTo('#editQuiz');
-  $("#difficultyLabel").text("Quiz Difficulty:");
-  $('<br>').appendTo('#editQuiz');
-  $('<input>').attr({
-    type: 'text',
-    id: 'difficultyInput',
-    name: 'difficulty',
-    class: 'form-control',
-    placeholder: "Quiz Difficulty"
-  }).appendTo('#editQuiz');
-  $('<br>').appendTo('#editQuiz');
-  */
+  $('#userTable').fadeOut();
+  $('#tenScores').fadeOut();
 
   for (var i = 0; i < 3; i++) {
     if (i === 0) {
@@ -665,16 +552,7 @@ function loadQuizToCreate() {
         class: 'answerLabel'
       }).appendTo('#questiondiv'+tempQuestionNum);
       $("#answerLabel"+tempQuestionNum).text("Answer Choices:");
-      /*$('<button>').attr({
-        id: 'editQuizAddAns-'+tempQuestionNum+'-'+(defaultNumOfAnswers),
-        class: 'btn btn-success editQuizAddAns editQuizAddRemoveAns'
-      }).appendTo('#questiondiv'+tempQuestionNum);
-      $("#editQuizAddAns-"+tempQuestionNum+'-'+(defaultNumOfAnswers)).text("+");
-      $('<button>').attr({
-        id: 'editQuizRemoveAns-'+tempQuestionNum+'-'+(defaultNumOfAnswers),
-        class: 'btn btn-danger editQuizRemoveAns editQuizAddRemoveAns'
-      }).appendTo('#questiondiv'+tempQuestionNum);
-      $("#editQuizRemoveAns-"+tempQuestionNum+'-'+(defaultNumOfAnswers)).text("—");*/
+
       $('<br>').appendTo('#questiondiv'+tempQuestionNum);
       $('<br>').appendTo('#questiondiv'+tempQuestionNum);
       $('<div>').attr({
@@ -870,16 +748,7 @@ function editQuizFormat(){
       class: 'answerLabel'
     }).appendTo('#questiondiv'+i);
     $("#answerLabel"+i).text("Answer Choices:");
-    /*$('<button>').attr({
-      id: 'editQuizAddAns-'+i+'-'+(quiz["questions"][i]["answers"].length-1),
-      class: 'btn btn-success editQuizAddAns editQuizAddRemoveAns'
-    }).appendTo('#questiondiv'+i);
-    $("#editQuizAddAns-"+i+'-'+(quiz["questions"][i]["answers"].length-1)).text("+");
-    $('<button>').attr({
-      id: 'editQuizRemoveAns-'+i+'-'+(quiz["questions"][i]["answers"].length-1),
-      class: 'btn btn-danger editQuizRemoveAns editQuizAddRemoveAns'
-    }).appendTo('#questiondiv'+i);
-    $("#editQuizRemoveAns-"+i+'-'+(quiz["questions"][i]["answers"].length-1)).text("—");*/
+
     $('<br>').appendTo('#questiondiv'+i);
     $('<br>').appendTo('#questiondiv'+i);
     $('<div>').attr({
@@ -945,6 +814,8 @@ function editQuizFormat(){
   }).appendTo('#editQuiz');
 }
 
+
+
 function addQuestion(tempQuestionNum) {
   var defaultNumOfAnswers = 1; //2 answers
   if (($("#editQuiz > div").length) < 25) {
@@ -977,16 +848,7 @@ function addQuestion(tempQuestionNum) {
       class: 'answerLabel'
     }).appendTo('#questiondiv'+tempQuestionNum);
     $("#answerLabel"+tempQuestionNum).text("Answer Choices:");
-    /*$('<button>').attr({
-      id: 'editQuizAddAns-'+tempQuestionNum+'-'+(defaultNumOfAnswers),
-      class: 'btn btn-success editQuizAddAns editQuizAddRemoveAns'
-    }).appendTo('#questiondiv'+tempQuestionNum);
-    $("#editQuizAddAns-"+tempQuestionNum+'-'+(defaultNumOfAnswers)).text("+");
-    $('<button>').attr({
-      id: 'editQuizRemoveAns-'+tempQuestionNum+'-'+(defaultNumOfAnswers),
-      class: 'btn btn-danger editQuizRemoveAns editQuizAddRemoveAns'
-    }).appendTo('#questiondiv'+tempQuestionNum);
-    $("#editQuizRemoveAns-"+tempQuestionNum+'-'+(defaultNumOfAnswers)).text("—");*/
+
     $('<br>').appendTo('#questiondiv'+tempQuestionNum);
     $('<br>').appendTo('#questiondiv'+tempQuestionNum);
     $('<div>').attr({
@@ -1040,10 +902,7 @@ function addQuestion(tempQuestionNum) {
 }
 
 function submitCreatedQuiz(){
-  //var tempTitle = $("#titleInput").val();
-  //var tempQuizMetaTags = $("#quizMetaTagsInput").val().split(",");
-  //var tempQuizDescription = $("#descriptionInput").val();
-  //var tempQuizDifficulty = $("#difficultyInput").val();
+
   var tempJSON = {
     "id": 0,
     "questions": []
@@ -1069,6 +928,7 @@ function submitCreatedQuiz(){
     tempJSON["questions"].push(tempQuestion);
   });
 
+  //Make API call to add questions
   $.ajax({
     type:"POST",
     url: "quiz",
@@ -1167,8 +1027,7 @@ function generateQA (){
   $('#questionNumber').text("Question " + (currentQuestion+1)).hide().fadeIn();
   
   //Commented by ME
-  //$('#question').text(quiz["questions"][currentQuestion]["text"]).hide().fadeIn();
-  //numAns = quiz["questions"][currentQuestion]["answers"].length;
+
   $('#question').text(quiz[currentQuestion]["question_text"]).hide().fadeIn();
   numAns = 4;
 
@@ -1212,24 +1071,7 @@ function generateQA (){
     }
 
   }
-  /*var tempTags = "";
-  for (var z = 0; z < quiz["questions"][currentQuestion]["meta_tags"].length; z++) {
-    tempTags+=quiz["questions"][currentQuestion]["meta_tags"][z] + ", ";
-  }
-  $.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?",
-  {
-    tags: tempTags,
-    tagmode: "any",
-    format: "json"
-  },
-  function(data) {
-    $.each(data.items, function(i,item){
-      $( "#images" ).empty();
-      $("<img />").attr("src", item.media.m).appendTo("#images");
-      $( "#images" ).hide().fadeIn("slow");
-      if ( i == 0 ) return false;
-    });
-  });*/
+
   if (currentQuestion === 0) {
     $('#previousQuestion').hide();
   }
@@ -1279,8 +1121,15 @@ function whichChecked() {
   }
 }
 
-// top ten users
+// show scores of top ten users
 function topTen(allUsers) {
+
+  if($("#userTable").is(":visible")==true){
+    $("#userTable").fadeOut();
+    $('#tenScores').fadeOut();
+    return;
+  }
+  
   allUsers.sort(function(a,b) {
     return ((b["user_correct"]*1.0)/b["user_total"]) - ((a["user_correct"]*1.0)/a["user_total"]);
   });
@@ -1305,62 +1154,10 @@ function userScore() {
   .done(function (data) {
     userJSON = data;
     currentUser = userJSON.length;
-    /*for (var i = 0; i < userJSON.length; i++) {
-      if (userJSON[i].name === name) {
-        currentUser = i;
-        break;
-      }
-    }
-    // if new user
-    if (currentUser === userJSON.length) {
-      var newUser = {
-        "name": name,
-        "user_correct": 0,
-        "user_total": 0
-      };
-      userJSON[currentUser] = newUser;
-    }
-    for (var n = 0; n < quizLength; n++){
-      if (userAnswers[n][1]) {
-        quiz["questions"][n]["global_correct"]+=1;
-        userJSON[currentUser]["user_correct"]+=1;
-      }
-      quiz["questions"][n]["global_total"]+=1;
-      userJSON[currentUser]["user_total"]+=1;
-    }*/
     topTen(userJSON);
-
-    // User Scores
-    /*$.ajax({
-      type:"POST",
-      url: "users",
-      data: JSON.stringify(userJSON),
-      timeout: 2000,
-      contentType: "application/json; charset=utf-8",
-      beforeSend: function(){
-        // console.log ("BEFORE USER SEND");
-      },
-      complete: function() {
-        // console.log ("COMPLETE USER LOADING");
-      },
-      success: function(data){
-        // console.log("users sent");
-      },
-      fail: function(){
-        // console.log("USER FAILED");
-      }
-    });*/
-    //createPieChart(quizLength-score, score, ((quizLength-score)*100)/quizLength, 100*score/quizLength);
   })
   .fail(function() {
-    // console.log("Failed to load user JSON");
-    /*for (var i = 0; i < quizLength; i++){
-      if (userAnswers[i][1]) {
-        quiz["questions"][i]["global_correct"]+=1;
-      }
-      quiz["questions"][i]["global_total"]+=1;
-    }
-    createPieChart(quizLength-score, score, ((quizLength-score)*100)/quizLength, 100*score/quizLength);*/
+    console.log("Failed to load user JSON");
   });
 }
 
@@ -1368,19 +1165,16 @@ function userScore() {
 function calculateScore() {
   for (var i = 0; i < quizLength; i++){
     if (userAnswers[i][1]) {
-      //quiz[i]["global_correct"]+=1;
       score++;
     }
-    //quiz["questions"][i]["global_total"]+=1;
   }
 }
 
-// Display score table
+// Display finals questions answer and explanation table after quiz ends
 function scorePerQuestionTable() {
   var correctAnsQuiz = 0;
   for (var r = 0; r < quizLength; r++) {
     $('#scoreTable').fadeIn("slow");
-    //var scorePercent = Math.round(100*quiz["questions"][r]["global_correct"]/quiz["questions"][r]["global_total"]);
     
     if (userAnswers[r][1]){
       $('#scoreTable > tbody:last-child').append('<tr class="success"><td class="questionNum">' + (r + 1) + '. ' + quiz[r]["question_text"] +

@@ -25,6 +25,7 @@
     <div class="form-group">
       <label for="name">First Name:</label>
       <input type="text" id="firstName" name="nameValue" placeholder="First Name" class="form-control"><br>
+      <!-- Load select box only if user is a professor to provided choices to delete a questions-->
       <% if(account_type == 'professor') { %>
       <select class="form-control" id="titlesDropdown">
         <% for(var i=0; i < questions.length; i++) {%>
@@ -33,7 +34,8 @@
       </select>
       <br>
       <% } %>
-
+      
+      <!-- Load only start quiz button if user is student otherwise load rest of the buttons-->
       <% if(account_type == 'student') { %>
       <input class="btn btn-primary" class="form-control" type="submit" id="start_quiz"value="Start Quiz">
       <% } %>
