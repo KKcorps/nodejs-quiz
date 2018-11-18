@@ -1,5 +1,5 @@
 {
-  "name": "computer science quiz",
+  "name": "computersciencequiz",
   "version": "1.0.0",
   "description": "nodeJS server for CS quiz",
   "main": "app.js",
