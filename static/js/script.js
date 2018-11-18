@@ -19,9 +19,10 @@ var titles;
 var selectedQuiz = 0;
 var ids;
 var notificationFadeTime = 3000;
-var min = 2;
+var min = 1;
 var sec = 0;
 var tim;
+var isTimerRunning = false;
 
 // Initial setup
 $(document).ready(function() {
@@ -162,9 +163,9 @@ $(document).ready(function() {
   var deleteQuizButton = document.getElementById("delete_quiz");
   if(deleteQuizButton != null){
       document.getElementById("delete_quiz").addEventListener("click", function(e) {
-        selectedQuiz = ids[titles.indexOf($('#titlesDropdown option:selected').text())];
+        selectedQuiz = $('#titlesDropdown option:selected').text();
         // if there exists a quiz
-        if (selectedQuiz > -1) {
+        if (selectedQuiz != null) {
           $.ajax({
             type: "DELETE",
             url: "quiz/" + selectedQuiz,
@@ -405,6 +406,7 @@ function nameForm(){
     $('#nameForm').hide();
     $('#welcome').text("Welcome " + name + "!");
     $('#welcome').prepend('<a href="/"><img src="static/HomeIcon.png" width="38" height="38" id="homeImg" alt=""></a>');
+    isTimerRunning = true;
     examTimer();
     selectedQuiz = ids[titles.indexOf($('#titlesDropdown option:selected').text())];
     var selectedTitle = 'Computer Science Quiz';
@@ -422,7 +424,11 @@ function examTimer() {
   }else {
     if (parseInt(min)==0 && parseInt(sec)==0){
       $("#showtime").text("Time Remaining :"+min+" Minutes ," + sec+" Seconds");
-      alert("Time Up");
+      
+      if(isTimerRunning == true){
+        alert("Time Up!! Try Completing the quiz next time! You'll be redirected to home page now. ");
+        window.location = "/"
+      }
       //document.questionForm.minute.value=0;
       //document.questionForm.second.value=0;
 
@@ -448,8 +454,8 @@ function loadTitles(){
     $('#ajaxloading').hide();
     $('#backHome').hide();
     $('#reload').hide();
-    titles = data.slice(0,data.length/2);
-    ids = data.slice(data.length/2);
+    titles = data;
+    //ids = data.slice(data.length/2);
     if (titles === undefined) {
       $('#ajaxloading').text("Sorry, we cannot load the quizzes. Please reload the page to try again.");
       $('#ajaxloading').show();
@@ -461,7 +467,7 @@ function loadTitles(){
         var select = document.getElementById("titlesDropdown");
         var option = document.createElement("option");
         var aTag = document.createElement("a");
-        option.appendChild(document.createTextNode(titles[i]));
+        option.appendChild(document.createTextNode(titles[i]['question_text']));
         select.appendChild(option);
       }
     }
@@ -1494,6 +1500,7 @@ function nextQuestion() {
       $('#answerWarning').hide();
       whichChecked();// Display end of quiz screen
       $('#welcome').hide();
+      isTimerRunning = false;
       $('#showtime').hide();
       $('#questionNumber').hide();
       $('#question').hide();

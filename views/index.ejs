@@ -25,19 +25,22 @@
     <div class="form-group">
       <label for="name">First Name:</label>
       <input type="text" id="firstName" name="nameValue" placeholder="First Name" class="form-control"><br>
-      <!-- <select class="form-control" id="titlesDropdown">
-        <% for(var i=0; i<titles.length; i++) {%>
-           <option><%= titles[i] %></option>
+      <% if(account_type == 'professor') { %>
+      <select class="form-control" id="titlesDropdown">
+        <% for(var i=0; i < questions.length; i++) {%>
+           <option><%= questions[i]['question_text'] %></option>
         <% } %>
       </select>
-      <br> -->
+      <br>
+      <% } %>
+
       <% if(account_type == 'student') { %>
       <input class="btn btn-primary" class="form-control" type="submit" id="start_quiz"value="Start Quiz">
       <% } %>
       <% if(account_type == 'professor') { %>
       <input class="btn btn-primary" class="form-control" type="submit" id="show_scores" value="Show top scores">  
       <input class="btn btn-success" class="form-control" type="submit" id="create_quiz" value="Add Questions">
-      <input class="btn btn-warning" class="form-control" type="submit" id="update_quiz" value="Update Questions">
+      <input class="btn btn-warning" class="form-control" type="submit" id="update_quiz" value="Update Questions" style="display:none;">
       <input class="btn btn-danger" class="form-control" type="submit" id="delete_quiz" value="Delete Questions">
       <% } %>
       <!-- <input class="btn btn-info" class="form-control" type="submit" id="logout" value="Logout"> -->

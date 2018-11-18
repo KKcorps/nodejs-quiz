@@ -114,7 +114,10 @@ app.get('/', function (req, res) {
     for (var i = 0; i<jsonContent.length; i++) {
       titles[i] = jsonContent[i]["title"];
     }
-    res.render('index',{titles: titles, account_type : sess.account_type});
+    dbQueries.getAllQuestions(conn, function(result){
+      res.render('index',{titles: titles, account_type : sess.account_type, questions : result});
+    });
+    
   }else{
     res.redirect('/login')
   }
@@ -164,7 +167,7 @@ app.get('/quiz/:id', function (req, res) {
     }
   }
   res.send(targetQuiz);*/
-  dbQueries.getQuestions(conn, 3, function(questions){
+  dbQueries.getQuestions(conn, 6, function(questions){
     res.send(questions);
   });
 });
@@ -187,7 +190,7 @@ app.put('/quiz/:id', function (req, res) {
 });
 
 app.delete('/quiz/:id', function (req, res) {
-  var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
+ /* var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
   var jsonContent = JSON.parse(readQuiz);
   for (var i = 0; i < jsonContent.length; i++) {
     if (jsonContent[i]["id"] === parseInt(req.params.id)) {
@@ -196,8 +199,11 @@ app.delete('/quiz/:id', function (req, res) {
     }
   }
   var jsonString = JSON.stringify(jsonContent);
-  fs.writeFile("data/allQuizzes.json", jsonString);
-  res.send("deleted");
+  fs.writeFile("data/allQuizzes.json", jsonString);*/
+  dbQueries.deleteQuestion(conn, req.params.id, function(result){
+    res.send("deleted");
+  });
+  
 });
 
 
@@ -247,14 +253,19 @@ app.get('/titles', function (req, res) {
 });
 
 app.get('/titlesandids', function (req, res) {
-  var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
+  /*var readQuiz = fs.readFileSync("data/allQuizzes.json", 'utf8');
   var jsonContent = JSON.parse(readQuiz);
   var titles = [];
   for (var i = 0; i<jsonContent.length; i++) {
     titles[i] = jsonContent[i]["title"];
     titles[jsonContent.length + i] = jsonContent[i]["id"];
   }
-  res.send(JSON.stringify(titles));
+  res.send(JSON.stringify(titles));*/
+
+  dbQueries.getAllQuestions(conn, function(result){
+    res.send(JSON.stringify(result));
+  });
+
 });
 
 
